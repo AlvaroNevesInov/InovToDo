@@ -1,7 +1,7 @@
-import './bootstrap';
+import { createApp } from 'vue';
 
-import Alpine from 'alpinejs';
+import TodoApp from './components/TodoApp.vue';
 
-window.Alpine = Alpine;
+import './bootstrap'; // Movido para depois do Vue
 
-Alpine.start();
+createApp(TodoApp).mount('#app');

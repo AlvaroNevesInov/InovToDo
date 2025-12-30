@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -45,6 +45,43 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="avatar" value="Avatar" />
+
+            <div class="mt-2 flex items-center gap-4">
+                @if ($user->avatar)
+                    <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                        <img src="{{ Storage::url($user->avatar) }}" alt="Avatar atual" class="w-full h-full object-cover">
+                    </div>
+                @else
+                    <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-2xl font-medium">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </span>
+                    </div>
+                @endif
+
+                <div class="flex-1">
+                    <input
+                        id="avatar"
+                        name="avatar"
+                        type="file"
+                        accept="image/*"
+                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                    />
+                    <p class="mt-1 text-xs text-gray-500">PNG, JPG ou GIF (MAX. 2MB)</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+
+                    @if ($user->avatar)
+                        <label class="mt-2 flex items-center">
+                            <input type="checkbox" name="remove_avatar" value="1" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-600">Remover avatar</span>
+                        </label>
+                    @endif
+                </div>
+            </div>
         </div>
 
         <div class="flex items-center gap-4">

@@ -30,20 +30,53 @@
       </button>
 
       <div class="flex-grow">
-        <h3
-          class="text-lg font-semibold"
-          :class="task.is_completed ? 'line-through text-gray-500' : 'text-gray-800'"
-        >
-          {{ task.title }}
-        </h3>
+        <div class="flex items-center justify-between">
+          <h3
+            class="text-lg font-semibold"
+            :class="task.is_completed ? 'line-through text-gray-500' : 'text-gray-800'"
+          >
+            {{ task.title }}
+          </h3>
 
-        <p
-          v-if="task.description"
-          class="text-gray-600 mt-1"
-          :class="{ 'line-through': task.is_completed }"
+          <button
+            v-if="task.description"
+            @click="showDetails = !showDetails"
+            class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 flex-shrink-0"
+          >
+            <span class="hidden sm:inline">{{ showDetails ? 'Ocultar detalhes' : 'Ver detalhes' }}</span>
+            <svg
+              class="w-4 h-4 transition-transform duration-200"
+              :class="{ 'rotate-180': showDetails }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <transition
+          enter-active-class="transition-all duration-200 ease-out"
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-96"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="opacity-100 max-h-96"
+          leave-to-class="opacity-0 max-h-0"
         >
-          {{ task.description }}
-        </p>
+          <p
+            v-if="task.description && showDetails"
+            class="text-gray-600 mt-2 overflow-hidden"
+            :class="{ 'line-through': task.is_completed }"
+          >
+            {{ task.description }}
+          </p>
+        </transition>
 
         <div class="flex flex-wrap items-center gap-3 mt-3">
           <span
@@ -181,6 +214,7 @@ export default {
   emits: ['task-updated', 'task-deleted', 'task-toggled'],
   setup(props, { emit }) {
     const isEditing = ref(false);
+    const showDetails = ref(false);
     const editForm = ref({});
 
     const priorityClasses = computed(() => {
@@ -251,6 +285,7 @@ export default {
 
     return {
       isEditing,
+      showDetails,
       editForm,
       priorityClasses,
       priorityText,

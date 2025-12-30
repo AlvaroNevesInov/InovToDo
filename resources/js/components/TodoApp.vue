@@ -1,13 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8 px-4">
     <div class="max-w-4xl mx-auto">
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">InovToDo - Gestão de Tarefas</h1>
-
+      <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Nova Tarefa</h2>
         <TaskForm @task-created="addTask" />
       </div>
 
-      <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <TaskFilters
           :filters="filters"
           @update-filters="updateFilters"

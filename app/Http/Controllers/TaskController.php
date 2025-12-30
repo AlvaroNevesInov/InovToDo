@@ -9,7 +9,7 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Task::query()->orderBy('created_at', 'desc');
+        $query = $request->user()->tasks()->orderBy('created_at', 'desc');
 
         if ($request->has('status')) {
             if ($request->status === 'completed') {
@@ -45,7 +45,7 @@ class TaskController extends Controller
             'priority' => 'required|in:high,medium,low',
         ]);
 
-        $task = Task::create($validated);
+        $task = $request->user()->tasks()->create($validated);
 
         if ($request->expectsJson()) {
             return response()->json($task, 201);
@@ -56,6 +56,8 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
+        $this->authorize('view', $task);
+
         if (request()->expectsJson()) {
             return response()->json($task);
         }
@@ -65,6 +67,8 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
+        $this->authorize('update', $task);
+
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
@@ -84,6 +88,8 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
+        $this->authorize('delete', $task);
+
         $task->delete();
 
         if (request()->expectsJson()) {
@@ -95,6 +101,8 @@ class TaskController extends Controller
 
     public function toggleComplete(Task $task)
     {
+        $this->authorize('update', $task);
+
         $task->update(['is_completed' => !$task->is_completed]);
 
         if (request()->expectsJson()) {

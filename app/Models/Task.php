@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
+        'user_id',
         'title',
         'description',
         'due_date',
@@ -44,5 +45,10 @@ class Task extends Model
         return $query->where('is_completed', false)
                      ->whereNotNull('due_date')
                      ->whereDate('due_date', '<', now());
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

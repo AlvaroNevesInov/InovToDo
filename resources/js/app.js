@@ -1,12 +1,7 @@
 import './bootstrap';
-import { createApp } from 'vue';
 
-// Importar componentes Vue
-import TodoApp from './components/TodoApp.vue';
+import Alpine from 'alpinejs';
 
-const app = createApp({});
+window.Alpine = Alpine;
 
-// Registrar componentes
-app.component('todo-app', TodoApp);
-
-app.mount('#app');
+Alpine.start();

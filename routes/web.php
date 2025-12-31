@@ -13,9 +13,11 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('tasks.index');
     })->name('dashboard');
 
-    // Task routes
-    Route::resource('tasks', TaskController::class);
-    Route::patch('tasks/{task}/toggle', [TaskController::class, 'toggleComplete'])->name('tasks.toggle');
+    // Task routes com rate limiting (60 requests por minuto)
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::resource('tasks', TaskController::class);
+        Route::patch('tasks/{task}/toggle', [TaskController::class, 'toggleComplete'])->name('tasks.toggle');
+    });
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

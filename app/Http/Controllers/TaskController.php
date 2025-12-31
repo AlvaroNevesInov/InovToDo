@@ -9,7 +9,9 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $query = $request->user()->tasks()->orderBy('created_at', 'desc');
+        // Eager loading do user (se necessário em relações futuras)
+        $query = $request->user()->tasks()
+            ->orderBy('created_at', 'desc');
 
         if ($request->has('status')) {
             if ($request->status === 'completed') {
@@ -27,7 +29,8 @@ class TaskController extends Controller
             $query->byDueDate($request->due_date);
         }
 
-        $tasks = $query->get();
+        // Paginação: 15 itens por página
+        $tasks = $query->paginate(15);
 
         if ($request->expectsJson()) {
             return response()->json($tasks);

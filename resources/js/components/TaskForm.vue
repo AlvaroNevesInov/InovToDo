@@ -11,6 +11,7 @@
           v-model="form.title"
           type="text"
           required
+          aria-required="true"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Digite o título da tarefa"
         />
@@ -50,6 +51,7 @@
             id="priority"
             v-model="form.priority"
             required
+            aria-required="true"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="low">Baixa</option>

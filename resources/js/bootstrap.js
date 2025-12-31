@@ -1,4 +1,9 @@
-import axios from 'axios';
-window.axios = axios;
+/**
 
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+ * Bootstrap file - configurações globais
+
+ *
+
+ * Nota: Axios foi removido pois a aplicação usa fetch() nativo
+
+ */

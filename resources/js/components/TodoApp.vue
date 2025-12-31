@@ -20,14 +20,23 @@
         />
       </div>
     </div>
+
+    <!-- Sistema de Notificações -->
+    <NotificationToast />
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
-import TaskForm from './TaskForm.vue';
-import TaskFilters from './TaskFilters.vue';
-import TaskList from './TaskList.vue';
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
+import { useNotification } from '../composables/useNotification';
+import { useApiCache } from '../composables/useApiCache';
+import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
+import NotificationToast from './NotificationToast.vue';
+
+// Lazy loading de componentes para melhor performance
+const TaskForm = defineAsyncComponent(() => import('./TaskForm.vue'));
+const TaskFilters = defineAsyncComponent(() => import('./TaskFilters.vue'));
+const TaskList = defineAsyncComponent(() => import('./TaskList.vue'));
 
 export default {
   name: 'TodoApp',
@@ -35,6 +44,7 @@ export default {
     TaskForm,
     TaskFilters,
     TaskList,
+    NotificationToast,
   },
   setup() {
     const tasks = ref([]);
@@ -44,17 +54,31 @@ export default {
       due_date: '',
     });
 
+    const { success, error } = useNotification();
+    const { fetchWithCache, removeCache } = useApiCache();
+
     const fetchTasks = async () => {
       try {
-        const response = await fetch('/tasks', {
-          headers: {
-            'Accept': 'application/json',
-          },
+        const data = await fetchWithCache('tasks', async () => {
+          const response = await fetch('/tasks', {
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao carregar tarefas');
+          }
+
+          const result = await response.json();
+          // Suporte para paginação - pegar só os data
+          return result.data || result;
         });
-        const data = await response.json();
+
         tasks.value = data;
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
+      } catch (err) {
+        error('Erro ao carregar tarefas', err.message);
+        console.error('Error fetching tasks:', err);
       }
     };
 
@@ -69,10 +93,20 @@ export default {
           },
           body: JSON.stringify(taskData),
         });
+
+        if (!response.ok) {
+          throw new Error('Erro ao criar tarefa');
+        }
+
         const newTask = await response.json();
         tasks.value.unshift(newTask);
-      } catch (error) {
-        console.error('Error creating task:', error);
+
+        // Invalida cache e mostra notificação de sucesso
+        removeCache('tasks');
+        success('Tarefa criada com sucesso!');
+      } catch (err) {
+        error('Erro ao criar tarefa', err.message);
+        console.error('Error creating task:', err);
       }
     };
 
@@ -87,28 +121,45 @@ export default {
           },
           body: JSON.stringify(taskData),
         });
+
+        if (!response.ok) {
+          throw new Error('Erro ao atualizar tarefa');
+        }
+
         const updatedTask = await response.json();
         const index = tasks.value.findIndex(t => t.id === taskId);
         if (index !== -1) {
           tasks.value[index] = updatedTask;
         }
-      } catch (error) {
-        console.error('Error updating task:', error);
+
+        removeCache('tasks');
+        success('Tarefa atualizada com sucesso!');
+      } catch (err) {
+        error('Erro ao atualizar tarefa', err.message);
+        console.error('Error updating task:', err);
       }
     };
 
     const deleteTask = async (taskId) => {
       try {
-        await fetch(`/tasks/${taskId}`, {
+        const response = await fetch(`/tasks/${taskId}`, {
           method: 'DELETE',
           headers: {
             'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
           },
         });
+
+        if (!response.ok) {
+          throw new Error('Erro ao excluir tarefa');
+        }
+
         tasks.value = tasks.value.filter(t => t.id !== taskId);
-      } catch (error) {
-        console.error('Error deleting task:', error);
+        removeCache('tasks');
+        success('Tarefa excluída com sucesso!');
+      } catch (err) {
+        error('Erro ao excluir tarefa', err.message);
+        console.error('Error deleting task:', err);
       }
     };
 
@@ -121,13 +172,21 @@ export default {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
           },
         });
+
+        if (!response.ok) {
+          throw new Error('Erro ao marcar tarefa');
+        }
+
         const updatedTask = await response.json();
         const index = tasks.value.findIndex(t => t.id === taskId);
         if (index !== -1) {
           tasks.value[index] = updatedTask;
         }
-      } catch (error) {
-        console.error('Error toggling task:', error);
+
+        removeCache('tasks');
+      } catch (err) {
+        error('Erro ao marcar tarefa', err.message);
+        console.error('Error toggling task:', err);
       }
     };
 
@@ -159,6 +218,29 @@ export default {
 
       return filtered;
     });
+
+    // Atalhos de teclado
+    useKeyboardShortcuts([
+      {
+        key: 'r',
+        ctrl: true,
+        handler: () => {
+          fetchTasks();
+          success('Lista de tarefas atualizada!');
+        },
+      },
+      {
+        key: 'f',
+        ctrl: true,
+        handler: () => {
+          // Focar no primeiro input do formulário
+          const firstInput = document.querySelector('#title');
+          if (firstInput) {
+            firstInput.focus();
+          }
+        },
+      },
+    ]);
 
     onMounted(() => {
       fetchTasks();

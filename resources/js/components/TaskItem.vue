@@ -7,6 +7,7 @@
       <button
         @click="toggleComplete"
         class="flex-shrink-0 mt-1"
+        :aria-label="task.is_completed ? 'Marcar tarefa como não concluída' : 'Marcar tarefa como concluída'"
       >
         <div
           class="w-6 h-6 rounded-full border-2 flex items-center justify-center"
@@ -18,6 +19,7 @@
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               stroke-linecap="round"
@@ -33,7 +35,7 @@
         <div class="flex items-center justify-between">
           <h3
             class="text-lg font-semibold"
-            :class="task.is_completed ? 'line-through text-gray-500' : 'text-gray-800'"
+            :class="task.is_completed ? 'line-through text-gray-600' : 'text-gray-800'"
           >
             {{ task.title }}
           </h3>
@@ -42,6 +44,8 @@
             v-if="task.description"
             @click="showDetails = !showDetails"
             class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 flex-shrink-0"
+            :aria-expanded="showDetails"
+            aria-label="Alternar detalhes da tarefa"
           >
             <span class="hidden sm:inline">{{ showDetails ? 'Ocultar detalhes' : 'Ver detalhes' }}</span>
             <svg
@@ -50,6 +54,7 @@
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 stroke-linecap="round"
@@ -87,7 +92,7 @@
           </span>
 
           <span v-if="task.due_date" class="text-sm text-gray-600 flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -108,9 +113,9 @@
         <button
           @click="startEditing"
           class="text-blue-600 hover:text-blue-800 p-1"
-          title="Editar"
+          aria-label="Editar tarefa"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -123,9 +128,9 @@
         <button
           @click="deleteTask"
           class="text-red-600 hover:text-red-800 p-1"
-          title="Excluir"
+          aria-label="Excluir tarefa"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -144,6 +149,7 @@
           v-model="editForm.title"
           type="text"
           required
+          aria-required="true"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -172,6 +178,7 @@
           <select
             v-model="editForm.priority"
             required
+            aria-required="true"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="low">Baixa</option>
@@ -197,14 +204,29 @@
         </button>
       </div>
     </form>
+
+    <!-- Confirmation Modal -->
+    <ConfirmationModal
+      v-model="showDeleteModal"
+      title="Excluir Tarefa"
+      message="Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita."
+      confirm-text="Excluir"
+      cancel-text="Cancelar"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed } from 'vue';
+import ConfirmationModal from './ConfirmationModal.vue';
 
 export default {
   name: 'TaskItem',
+  components: {
+    ConfirmationModal,
+  },
   props: {
     task: {
       type: Object,
@@ -277,10 +299,19 @@ export default {
       isEditing.value = false;
     };
 
+    const showDeleteModal = ref(false);
+
     const deleteTask = () => {
-      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-        emit('task-deleted', props.task.id);
-      }
+      showDeleteModal.value = true;
+    };
+
+    const confirmDelete = () => {
+      emit('task-deleted', props.task.id);
+      showDeleteModal.value = false;
+    };
+
+    const cancelDelete = () => {
+      showDeleteModal.value = false;
     };
 
     return {
@@ -296,6 +327,9 @@ export default {
       cancelEditing,
       saveEdit,
       deleteTask,
+      showDeleteModal,
+      confirmDelete,
+      cancelDelete,
     };
   },
 };

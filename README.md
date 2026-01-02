@@ -1,66 +1,448 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# InovToDo
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Uma aplicação moderna de gerenciamento de tarefas (To-Do List) construída com Laravel 12 e Vue.js 3.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel)
+![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=flat-square&logo=vue.js)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php)
+![Tests](https://img.shields.io/badge/Tests-Passing-success?style=flat-square)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Características
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- ✅ **CRUD Completo de Tarefas** - Criar, visualizar, editar e deletar tarefas
+- 🔐 **Autenticação Segura** - Sistema de login/registro com Laravel Breeze
+- 🎨 **Interface Moderna** - UI responsiva com Tailwind CSS
+- ⚡ **Performance Otimizada** - Lazy loading de componentes e cache de API
+- 🔔 **Sistema de Notificações** - Feedback visual para todas as ações
+- 🎯 **Filtros e Busca** - Filtrar por status, prioridade e data de vencimento
+- ⌨️ **Atalhos de Teclado** - Ctrl+R para recarregar, Ctrl+F para focar no formulário
+- 🧪 **Testes Automatizados** - Cobertura de testes unitários e de integração
+- 📱 **Responsivo** - Funciona perfeitamente em desktop e mobile
+- ♿ **Acessível** - Seguindo práticas de acessibilidade (ARIA)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tecnologias
 
-## Learning Laravel
+### Backend
+- **Laravel 12** - Framework PHP moderno
+- **PHP 8.2+** - Linguagem de programação
+- **MySQL/PostgreSQL/SQLite** - Banco de dados
+- **Laravel Breeze** - Autenticação
+- **PHPUnit** - Testes
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Frontend
+- **Vue.js 3.5** - Framework JavaScript progressivo
+- **Vite 7** - Build tool moderna e rápida
+- **Tailwind CSS 4** - Framework CSS utility-first
+- **Alpine.js** - JavaScript reativo
+- **Vitest** - Framework de testes para Vue
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Requisitos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- NPM ou Yarn
+- MySQL, PostgreSQL ou SQLite
 
-## Laravel Sponsors
+## Instalação
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1. Clone o repositório
 
-### Premium Partners
+```bash
+git clone https://github.com/seu-usuario/InovToDo.git
+cd InovToDo
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 2. Instale as dependências do PHP
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Instale as dependências do Node.js
 
-## Code of Conduct
+```bash
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Configure o ambiente
 
-## Security Vulnerabilities
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Edite o arquivo `.env` e configure sua conexão com o banco de dados:
 
-## License
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=inovtodo
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Execute as migrations
+
+```bash
+php artisan migrate
+```
+
+### 6. (Opcional) Popule o banco com dados de teste
+
+```bash
+php artisan db:seed
+```
+
+### 7. Compile os assets
+
+**Desenvolvimento:**
+```bash
+npm run dev
+```
+
+**Produção:**
+```bash
+npm run build
+```
+
+### 8. Inicie o servidor
+
+```bash
+php artisan serve
+```
+
+A aplicação estará disponível em `http://localhost:8000`
+
+## Uso
+
+### Criar uma Conta
+
+1. Acesse `http://localhost:8000/register`
+2. Preencha o formulário de registro
+3. Faça login com suas credenciais
+
+### Gerenciar Tarefas
+
+**Criar Tarefa:**
+- Preencha o formulário "Nova Tarefa"
+- Campos obrigatórios: Título e Prioridade
+- Campos opcionais: Descrição e Data de Vencimento
+
+**Filtrar Tarefas:**
+- Use os filtros na parte superior para filtrar por:
+  - Status (Todas, Pendentes, Concluídas)
+  - Prioridade (Alta, Média, Baixa)
+  - Data de Vencimento
+
+**Editar Tarefa:**
+- Clique no ícone de edição (lápis)
+- Modifique os campos desejados
+- Clique em "Salvar"
+
+**Concluir/Desmarcar Tarefa:**
+- Clique no checkbox à esquerda da tarefa
+
+**Deletar Tarefa:**
+- Clique no ícone de lixeira
+- Confirme a exclusão no modal
+
+### Atalhos de Teclado
+
+- `Ctrl + R` - Recarregar lista de tarefas
+- `Ctrl + F` - Focar no campo de título do formulário
+
+## Testes
+
+### Testes Backend (PHPUnit)
+
+Execute todos os testes:
+```bash
+php artisan test
+```
+
+Execute testes específicos:
+```bash
+php artisan test --filter TaskControllerTest
+```
+
+Gerar relatório de cobertura:
+```bash
+php artisan test --coverage
+```
+
+### Testes Frontend (Vitest)
+
+Execute todos os testes:
+```bash
+npm run test
+```
+
+Execute testes em modo watch:
+```bash
+npm run test -- --watch
+```
+
+Execute testes com interface visual:
+```bash
+npm run test:ui
+```
+
+Gerar relatório de cobertura:
+```bash
+npm run test:coverage
+```
+
+### Estrutura de Testes
+
+```
+tests/
+├── Feature/
+│   ├── TaskControllerTest.php      # Testes de integração do controller
+│   └── Auth/                       # Testes de autenticação
+├── Unit/
+│   ├── TaskModelTest.php           # Testes do model Task
+│   └── TaskPolicyTest.php          # Testes da policy
+└── JavaScript/
+    ├── components/                 # Testes de componentes Vue
+    │   ├── TaskForm.test.js
+    │   ├── TaskItem.test.js
+    │   └── NotificationToast.test.js
+    └── composables/                # Testes de composables
+        ├── useNotification.test.js
+        └── useApiCache.test.js
+```
+
+## Documentação
+
+- [Arquitetura](docs/ARCHITECTURE.md) - Visão detalhada da arquitetura da aplicação
+- [API](docs/API.md) - Documentação completa da API REST
+
+## Funcionalidades Principais
+
+### Sistema de Tarefas
+
+**Model Task:**
+- Campos: `title`, `description`, `due_date`, `priority`, `is_completed`
+- Scopes úteis: `completed()`, `pending()`, `byPriority()`, `overdue()`
+- Relacionamento com User
+
+**Prioridades:**
+- Alta (high) - Badge vermelho
+- Média (medium) - Badge amarelo
+- Baixa (low) - Badge verde
+
+**Indicadores:**
+- Tarefas atrasadas são marcadas com "Atrasada" em vermelho
+- Tarefas concluídas aparecem riscadas e com fundo cinza
+
+### Sistema de Notificações
+
+**Tipos de Notificações:**
+- Success (verde) - Ações bem-sucedidas
+- Error (vermelho) - Erros e falhas
+- Warning (amarelo) - Avisos
+- Info (azul) - Informações gerais
+
+**Características:**
+- Auto-dismiss após 5 segundos (configurável)
+- Suporte a múltiplas notificações simultâneas
+- Botão de fechar manual
+- Animações suaves
+
+### Cache de API
+
+**Características:**
+- Cache em localStorage com TTL de 5 minutos
+- Invalidação automática após operações de escrita
+- Reduz requisições ao servidor
+- Melhora experiência offline
+
+### Segurança
+
+**Medidas Implementadas:**
+- CSRF Protection em todos os formulários
+- Authorization via Laravel Policies
+- Security Headers (CSP, X-Frame-Options, etc.)
+- Validação server-side obrigatória
+- Sanitização de inputs
+- Autenticação baseada em sessão
+
+## Desenvolvimento
+
+### Estrutura de Diretórios
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   └── TaskController.php
+│   ├── Middleware/
+│   └── Requests/
+├── Models/
+│   ├── Task.php
+│   └── User.php
+└── Policies/
+    └── TaskPolicy.php
+
+resources/
+├── js/
+│   ├── components/
+│   │   ├── TodoApp.vue
+│   │   ├── TaskForm.vue
+│   │   ├── TaskList.vue
+│   │   └── TaskItem.vue
+│   └── composables/
+│       ├── useNotification.js
+│       ├── useApiCache.js
+│       └── useKeyboardShortcuts.js
+└── views/
+    └── tasks/
+        └── index.blade.php
+```
+
+### Padrões de Código
+
+**Backend (PHP):**
+- PSR-12 para style guide
+- Laravel Pint para formatação automática
+- DocBlocks para métodos públicos
+
+```bash
+# Formatar código PHP
+./vendor/bin/pint
+```
+
+**Frontend (JavaScript/Vue):**
+- ESLint com configuração Vue recomendada
+- Prettier para formatação
+- Composition API do Vue 3
+
+### Comandos Úteis
+
+**Laravel:**
+```bash
+# Limpar cache
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Executar migrations
+php artisan migrate
+
+# Reverter última migration
+php artisan migrate:rollback
+
+# Gerar model com migration e factory
+php artisan make:model Task -mf
+
+# Gerar controller
+php artisan make:controller TaskController --resource
+```
+
+**NPM:**
+```bash
+# Instalar dependências
+npm install
+
+# Build para produção
+npm run build
+
+# Modo de desenvolvimento com hot reload
+npm run dev
+
+# Rodar testes
+npm run test
+```
+
+## Deploy
+
+### Preparação
+
+1. Configure variáveis de ambiente em `.env`
+2. Compile assets para produção: `npm run build`
+3. Otimize autoloader: `composer install --optimize-autoloader --no-dev`
+4. Cache de configuração: `php artisan config:cache`
+5. Cache de rotas: `php artisan route:cache`
+6. Cache de views: `php artisan view:cache`
+
+### Servidor Web
+
+Configure seu servidor web (Apache/Nginx) para apontar para a pasta `public/`.
+
+**Nginx (exemplo):**
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/InovToDo/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+## Contribuindo
+
+Contribuições são bem-vindas! Por favor:
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+### Guidelines
+
+- Escreva testes para novas funcionalidades
+- Siga os padrões de código do projeto
+- Atualize a documentação conforme necessário
+- Mantenha mensagens de commit claras e descritivas
+
+## Roadmap
+
+- [ ] Suporte a tags/categorias
+- [ ] Anexos de arquivos em tarefas
+- [ ] Compartilhamento de tarefas entre usuários
+- [ ] Notificações por email
+- [ ] API REST pública com versionamento
+- [ ] Aplicativo mobile (React Native)
+- [ ] Integração com calendários (Google Calendar, Outlook)
+- [ ] Temas customizáveis
+- [ ] Exportar tarefas (PDF, CSV)
+- [ ] Subtarefas e dependências
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## Autor
+
+Desenvolvido com ❤️ por [Seu Nome]
+
+## Suporte
+
+Para reportar bugs ou solicitar funcionalidades, abra uma [issue](https://github.com/seu-usuario/InovToDo/issues) no GitHub.
+
+---
+
+**InovToDo** - Organize suas tarefas de forma simples e eficiente.

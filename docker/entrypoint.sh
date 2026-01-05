@@ -58,6 +58,15 @@ echo "Database is ready!"
 # Run migrations
 php artisan migrate --force --no-interaction
 
+# Seed database if empty (check if users table is empty)
+USER_COUNT=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null || echo "0")
+if [ "$USER_COUNT" = "0" ]; then
+  echo "Database is empty, running seeders..."
+  php artisan db:seed --force --no-interaction
+else
+  echo "Database already has users, skipping seeding."
+fi
+
 # Clear and cache config
 php artisan config:cache
 php artisan route:cache

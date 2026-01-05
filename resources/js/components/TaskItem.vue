@@ -1,7 +1,11 @@
 <template>
   <div
-    class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
-    :class="{ 'bg-gray-50': task.is_completed }"
+    class="relative overflow-hidden rounded-lg p-4 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1"
+    :class="[
+      task.is_completed ? 'bg-gray-50' : priorityBackgroundClass,
+      priorityBorderClass,
+      'border-l-4'
+    ]"
   >
     <div v-if="!isEditing" class="flex items-start space-x-4">
       <button
@@ -142,56 +146,111 @@
       </div>
     </div>
 
-    <form v-else @submit.prevent="saveEdit" class="space-y-4">
+    <form v-else @submit.prevent="saveEdit" class="space-y-4" novalidate>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
         <input
-          v-model="editForm.title"
+          v-model="editValues.title"
+          @blur="touchEditField('title')"
           type="text"
-          required
           aria-required="true"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          :aria-invalid="shouldShowEditError('title')"
+          :aria-describedby="shouldShowEditError('title') ? 'edit-title-error' : undefined"
+          :class="[
+            'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition',
+            shouldShowEditError('title') ? 'border-red-500' : 'border-gray-300'
+          ]"
         />
+        <p
+          v-if="shouldShowEditError('title')"
+          id="edit-title-error"
+          class="mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ editErrors.title }}
+        </p>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
         <textarea
-          v-model="editForm.description"
+          v-model="editValues.description"
+          @blur="touchEditField('description')"
           rows="2"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          :aria-invalid="shouldShowEditError('description')"
+          :aria-describedby="shouldShowEditError('description') ? 'edit-description-error' : undefined"
+          :class="[
+            'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition',
+            shouldShowEditError('description') ? 'border-red-500' : 'border-gray-300'
+          ]"
         ></textarea>
+        <p
+          v-if="shouldShowEditError('description')"
+          id="edit-description-error"
+          class="mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ editErrors.description }}
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
           <input
-            v-model="editForm.due_date"
+            v-model="editValues.due_date"
+            @blur="touchEditField('due_date')"
             type="date"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            :aria-invalid="shouldShowEditError('due_date')"
+            :aria-describedby="shouldShowEditError('due_date') ? 'edit-due_date-error' : undefined"
+            :class="[
+              'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition',
+              shouldShowEditError('due_date') ? 'border-red-500' : 'border-gray-300'
+            ]"
           />
+          <p
+            v-if="shouldShowEditError('due_date')"
+            id="edit-due_date-error"
+            class="mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ editErrors.due_date }}
+          </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prioridade *</label>
           <select
-            v-model="editForm.priority"
-            required
+            v-model="editValues.priority"
+            @blur="touchEditField('priority')"
             aria-required="true"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            :aria-invalid="shouldShowEditError('priority')"
+            :aria-describedby="shouldShowEditError('priority') ? 'edit-priority-error' : undefined"
+            :class="[
+              'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition',
+              shouldShowEditError('priority') ? 'border-red-500' : 'border-gray-300'
+            ]"
           >
             <option value="low">Baixa</option>
             <option value="medium">Média</option>
             <option value="high">Alta</option>
           </select>
+          <p
+            v-if="shouldShowEditError('priority')"
+            id="edit-priority-error"
+            class="mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ editErrors.priority }}
+          </p>
         </div>
       </div>
 
       <div class="flex space-x-2">
         <button
           type="submit"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+          :disabled="!isEditValid"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Salvar
         </button>
@@ -204,6 +263,9 @@
         </button>
       </div>
     </form>
+
+    <!-- Success Animation -->
+    <SuccessAnimation v-model="showSuccessAnimation" />
 
     <!-- Confirmation Modal -->
     <ConfirmationModal
@@ -219,13 +281,16 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import ConfirmationModal from './ConfirmationModal.vue';
+import SuccessAnimation from './SuccessAnimation.vue';
+import { useFormValidation, taskValidationRules } from '../composables/useFormValidation';
 
 export default {
   name: 'TaskItem',
   components: {
     ConfirmationModal,
+    SuccessAnimation,
   },
   props: {
     task: {
@@ -237,7 +302,35 @@ export default {
   setup(props, { emit }) {
     const isEditing = ref(false);
     const showDetails = ref(false);
-    const editForm = ref({});
+    const showSuccessAnimation = ref(false);
+
+    // Watch para mostrar animação quando tarefa é completada
+    watch(() => props.task.is_completed, (newVal, oldVal) => {
+      // Só mostra animação se mudou de não completa para completa
+      if (newVal === true && oldVal === false) {
+        showSuccessAnimation.value = true;
+      }
+    });
+
+    // Validação para o formulário de edição
+    const {
+      values: editValues,
+      errors: editErrors,
+      isValid: isEditValid,
+      validate: validateEdit,
+      touchField: touchEditField,
+      shouldShowError: shouldShowEditError,
+      setValues: setEditValues,
+      resetValidation: resetEditValidation,
+    } = useFormValidation(
+      {
+        title: '',
+        description: '',
+        due_date: '',
+        priority: 'medium',
+      },
+      taskValidationRules
+    );
 
     const priorityClasses = computed(() => {
       const classes = {
@@ -255,6 +348,24 @@ export default {
         low: 'Baixa',
       };
       return texts[props.task.priority] || 'Média';
+    });
+
+    const priorityBorderClass = computed(() => {
+      const borders = {
+        high: 'border-red-500',
+        medium: 'border-yellow-500',
+        low: 'border-green-500',
+      };
+      return borders[props.task.priority] || borders.medium;
+    });
+
+    const priorityBackgroundClass = computed(() => {
+      const backgrounds = {
+        high: 'bg-gradient-to-r from-red-50 via-white to-white',
+        medium: 'bg-gradient-to-r from-yellow-50 via-white to-white',
+        low: 'bg-gradient-to-r from-green-50 via-white to-white',
+      };
+      return backgrounds[props.task.priority] || backgrounds.medium;
     });
 
     const isOverdue = computed(() => {
@@ -280,22 +391,29 @@ export default {
     };
 
     const startEditing = () => {
-      editForm.value = {
+      // Define os valores do formulário de edição com os valores da tarefa
+      setEditValues({
         title: props.task.title,
         description: props.task.description || '',
         due_date: props.task.due_date || '',
         priority: props.task.priority,
-      };
+      });
+      resetEditValidation();
       isEditing.value = true;
     };
 
     const cancelEditing = () => {
       isEditing.value = false;
-      editForm.value = {};
+      resetEditValidation();
     };
 
     const saveEdit = () => {
-      emit('task-updated', props.task.id, editForm.value);
+      // Valida antes de salvar
+      if (!validateEdit()) {
+        return;
+      }
+
+      emit('task-updated', props.task.id, { ...editValues });
       isEditing.value = false;
     };
 
@@ -317,9 +435,16 @@ export default {
     return {
       isEditing,
       showDetails,
-      editForm,
+      showSuccessAnimation,
+      editValues,
+      editErrors,
+      isEditValid,
+      touchEditField,
+      shouldShowEditError,
       priorityClasses,
       priorityText,
+      priorityBorderClass,
+      priorityBackgroundClass,
       isOverdue,
       formatDate,
       toggleComplete,

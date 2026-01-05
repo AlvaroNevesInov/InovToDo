@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 
-import TodoApp from './components/TodoApp.vue';
+import App from './components/App.vue';
 
 import './bootstrap'; // Movido para depois do Vue
 
-createApp(TodoApp).mount('#app');
+createApp(App).mount('#app');

@@ -3,20 +3,25 @@
     <div class="max-w-4xl mx-auto">
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Nova Tarefa</h2>
-        <TaskForm @task-created="addTask" />
+        <TaskForm @task-created="handleTaskCreated" :is-loading="isCreating" />
       </div>
+
+      <!-- Dashboard de Estatísticas -->
+      <TaskStats :tasks="tasks" />
 
       <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <TaskFilters
           :filters="filters"
+          :tasks="tasks"
           @update-filters="updateFilters"
         />
 
         <TaskList
           :tasks="filteredTasks"
-          @task-updated="updateTask"
-          @task-deleted="deleteTask"
-          @task-toggled="toggleTask"
+          :is-loading="isFetching"
+          @task-updated="handleTaskUpdated"
+          @task-deleted="handleTaskDeleted"
+          @task-toggled="handleTaskToggled"
         />
       </div>
     </div>
@@ -29,7 +34,7 @@
 <script>
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
 import { useNotification } from '../composables/useNotification';
-import { useApiCache } from '../composables/useApiCache';
+import { useTaskApi } from '../composables/useTaskApi';
 import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
 import NotificationToast from './NotificationToast.vue';
 
@@ -37,6 +42,7 @@ import NotificationToast from './NotificationToast.vue';
 const TaskForm = defineAsyncComponent(() => import('./TaskForm.vue'));
 const TaskFilters = defineAsyncComponent(() => import('./TaskFilters.vue'));
 const TaskList = defineAsyncComponent(() => import('./TaskList.vue'));
+const TaskStats = defineAsyncComponent(() => import('./TaskStats.vue'));
 
 export default {
   name: 'TodoApp',
@@ -44,6 +50,7 @@ export default {
     TaskForm,
     TaskFilters,
     TaskList,
+    TaskStats,
     NotificationToast,
   },
   setup() {
@@ -54,146 +61,86 @@ export default {
       due_date: '',
     });
 
-    const { success, error } = useNotification();
-    const { fetchWithCache, removeCache } = useApiCache();
+    const { success } = useNotification();
 
-    const fetchTasks = async () => {
-      try {
-        const data = await fetchWithCache('tasks', async () => {
-          const response = await fetch('/tasks', {
-            headers: {
-              'Accept': 'application/json',
-            },
-          });
+    // Usa o novo composable centralizado de API
+    const {
+      fetchTasks: apiFetchTasks,
+      createTask,
+      updateTask: apiUpdateTask,
+      deleteTask: apiDeleteTask,
+      toggleTask: apiToggleTask,
+      isFetching,
+      isCreating,
+      isUpdating,
+      isDeleting,
+      isToggling,
+    } = useTaskApi();
 
-          if (!response.ok) {
-            throw new Error('Erro ao carregar tarefas');
-          }
-
-          const result = await response.json();
-          // Suporte para paginação - pegar só os data
-          return result.data || result;
-        });
-
-        tasks.value = data;
-      } catch (err) {
-        error('Erro ao carregar tarefas', err.message);
-        console.error('Error fetching tasks:', err);
-      }
+    /**
+     * Carrega todas as tarefas da API
+     */
+    const loadTasks = async () => {
+      const data = await apiFetchTasks();
+      tasks.value = data;
     };
 
-    const addTask = async (taskData) => {
-      try {
-        const response = await fetch('/tasks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          },
-          body: JSON.stringify(taskData),
-        });
-
-        if (!response.ok) {
-          throw new Error('Erro ao criar tarefa');
-        }
-
-        const newTask = await response.json();
+    /**
+     * Handler para criação de nova tarefa
+     */
+    const handleTaskCreated = async (taskData) => {
+      const newTask = await createTask(taskData);
+      if (newTask) {
         tasks.value.unshift(newTask);
-
-        // Invalida cache e mostra notificação de sucesso
-        removeCache('tasks');
-        success('Tarefa criada com sucesso!');
-      } catch (err) {
-        error('Erro ao criar tarefa', err.message);
-        console.error('Error creating task:', err);
       }
     };
 
-    const updateTask = async (taskId, taskData) => {
-      try {
-        const response = await fetch(`/tasks/${taskId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          },
-          body: JSON.stringify(taskData),
-        });
-
-        if (!response.ok) {
-          throw new Error('Erro ao atualizar tarefa');
-        }
-
-        const updatedTask = await response.json();
+    /**
+     * Handler para atualização de tarefa
+     */
+    const handleTaskUpdated = async (taskId, taskData) => {
+      const updatedTask = await apiUpdateTask(taskId, taskData);
+      if (updatedTask) {
         const index = tasks.value.findIndex(t => t.id === taskId);
         if (index !== -1) {
           tasks.value[index] = updatedTask;
         }
-
-        removeCache('tasks');
-        success('Tarefa atualizada com sucesso!');
-      } catch (err) {
-        error('Erro ao atualizar tarefa', err.message);
-        console.error('Error updating task:', err);
       }
     };
 
-    const deleteTask = async (taskId) => {
-      try {
-        const response = await fetch(`/tasks/${taskId}`, {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Erro ao excluir tarefa');
-        }
-
+    /**
+     * Handler para exclusão de tarefa
+     */
+    const handleTaskDeleted = async (taskId) => {
+      const deleted = await apiDeleteTask(taskId);
+      if (deleted) {
         tasks.value = tasks.value.filter(t => t.id !== taskId);
-        removeCache('tasks');
-        success('Tarefa excluída com sucesso!');
-      } catch (err) {
-        error('Erro ao excluir tarefa', err.message);
-        console.error('Error deleting task:', err);
       }
     };
 
-    const toggleTask = async (taskId) => {
-      try {
-        const response = await fetch(`/tasks/${taskId}/toggle`, {
-          method: 'PATCH',
-          headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Erro ao marcar tarefa');
-        }
-
-        const updatedTask = await response.json();
+    /**
+     * Handler para toggle de status de tarefa
+     */
+    const handleTaskToggled = async (taskId) => {
+      const updatedTask = await apiToggleTask(taskId);
+      if (updatedTask) {
         const index = tasks.value.findIndex(t => t.id === taskId);
         if (index !== -1) {
           tasks.value[index] = updatedTask;
         }
-
-        removeCache('tasks');
-      } catch (err) {
-        error('Erro ao marcar tarefa', err.message);
-        console.error('Error toggling task:', err);
       }
     };
 
+    /**
+     * Atualiza os filtros de visualização
+     */
     const updateFilters = (newFilters) => {
       filters.value = newFilters;
     };
 
+    /**
+     * Computed property para tarefas filtradas
+     */
     const filteredTasks = computed(() => {
       let filtered = [...tasks.value];
 
@@ -225,7 +172,7 @@ export default {
         key: 'r',
         ctrl: true,
         handler: () => {
-          fetchTasks();
+          loadTasks();
           success('Lista de tarefas atualizada!');
         },
       },
@@ -243,18 +190,23 @@ export default {
     ]);
 
     onMounted(() => {
-      fetchTasks();
+      loadTasks();
     });
 
     return {
       tasks,
       filters,
       filteredTasks,
-      addTask,
-      updateTask,
-      deleteTask,
-      toggleTask,
+      handleTaskCreated,
+      handleTaskUpdated,
+      handleTaskDeleted,
+      handleTaskToggled,
       updateFilters,
+      isFetching,
+      isCreating,
+      isUpdating,
+      isDeleting,
+      isToggling,
     };
   },
 };

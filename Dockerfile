@@ -18,6 +18,9 @@ RUN npm run build
 # Stage 2: PHP application
 FROM php:8.4-fpm-alpine
 
+# Force rebuild - version 2
+ENV REBUILD_VERSION=2
+
 # Install system dependencies
 RUN apk add --no-cache \
     nginx \

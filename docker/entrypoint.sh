@@ -8,18 +8,20 @@ mkdir -p /var/www/html/storage/framework/cache
 mkdir -p /var/www/html/storage/framework/sessions
 mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/logs
-mkdir -p /var/www/html/database
-
-# Create SQLite database file if it doesn't exist
-touch /var/www/html/database/database.sqlite
 
 # Set permissions
 chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/bootstrap/cache
-chown -R www-data:www-data /var/www/html/database
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
-chmod 664 /var/www/html/database/database.sqlite
+
+# Wait for database to be ready
+echo "Waiting for database connection..."
+until php artisan db:show > /dev/null 2>&1; do
+  echo "Database is unavailable - sleeping"
+  sleep 2
+done
+echo "Database is ready!"
 
 # Run migrations
 php artisan migrate --force --no-interaction

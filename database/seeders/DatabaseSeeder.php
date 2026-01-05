@@ -16,9 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Criar utilizador admin para testes
-        $admin = User::factory()->create([
+        $admin = User::create([
             'name' => 'Admin',
             'email' => 'admin@inovtodo.com',
+            'email_verified_at' => now(),
             'password' => bcrypt('password'), // Senha: password
         ]);
 
@@ -62,9 +63,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Criar utilizador de teste adicional
-        $testUser = User::factory()->create([
+        $testUser = User::create([
             'name' => 'Teste Utilizador',
             'email' => 'teste@inovtodo.com',
+            'email_verified_at' => now(),
             'password' => bcrypt('password'), // Senha: password
         ]);
 

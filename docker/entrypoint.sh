@@ -15,21 +15,42 @@ chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 
+# IMPORTANT: Clear all Laravel caches first
+echo "Clearing Laravel caches..."
+rm -rf bootstrap/cache/*.php
+php artisan config:clear || true
+php artisan cache:clear || true
+
 # Wait for database to be ready (with timeout)
 echo "Waiting for database connection..."
-RETRIES=30
+echo "DB_HOST: $DB_HOST"
+echo "DB_PORT: $DB_PORT"
+echo "DB_DATABASE: $DB_DATABASE"
+echo "DB_USERNAME: $DB_USERNAME"
+echo "DB_PASSWORD length: ${#DB_PASSWORD}"
+
+# Show PHP MySQL extension
+echo "Checking PHP MySQL extensions..."
+php -m | grep -i mysql || echo "WARNING: MySQL extensions not found!"
+
+# Test with actual error output
+echo "Testing database connection with detailed error..."
+php artisan db:show 2>&1 || echo "Initial connection failed (expected)"
+
+# Wait for database
+RETRIES=10
 COUNT=0
-until php artisan db:show > /dev/null 2>&1; do
+until php artisan db:show 2>&1; do
   COUNT=$((COUNT+1))
   if [ $COUNT -ge $RETRIES ]; then
-    echo "ERROR: Database connection timeout after $RETRIES attempts"
-    echo "DB_HOST: $DB_HOST"
-    echo "DB_PORT: $DB_PORT"
-    echo "DB_DATABASE: $DB_DATABASE"
-    echo "DB_USERNAME: $DB_USERNAME"
+    echo "ERROR: Database connection failed after $RETRIES attempts"
+    echo "Last error output:"
+    php artisan migrate --force --no-interaction 2>&1 || true
+    echo "--- Attempting manual MySQL connection test ---"
+    php -r "try { new PDO('mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_DATABASE', '$DB_USERNAME', '$DB_PASSWORD'); echo 'PDO connection SUCCESS\n'; } catch (Exception \$e) { echo 'PDO Error: ' . \$e->getMessage() . '\n'; }" || true
     exit 1
   fi
-  echo "Database is unavailable - attempt $COUNT/$RETRIES - sleeping 3s..."
+  echo "Database unavailable - attempt $COUNT/$RETRIES..."
   sleep 3
 done
 echo "Database is ready!"

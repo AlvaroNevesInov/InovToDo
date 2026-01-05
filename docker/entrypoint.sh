@@ -15,11 +15,22 @@ chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 
-# Wait for database to be ready
+# Wait for database to be ready (with timeout)
 echo "Waiting for database connection..."
+RETRIES=30
+COUNT=0
 until php artisan db:show > /dev/null 2>&1; do
-  echo "Database is unavailable - sleeping"
-  sleep 2
+  COUNT=$((COUNT+1))
+  if [ $COUNT -ge $RETRIES ]; then
+    echo "ERROR: Database connection timeout after $RETRIES attempts"
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_PORT: $DB_PORT"
+    echo "DB_DATABASE: $DB_DATABASE"
+    echo "DB_USERNAME: $DB_USERNAME"
+    exit 1
+  fi
+  echo "Database is unavailable - attempt $COUNT/$RETRIES - sleeping 3s..."
+  sleep 3
 done
 echo "Database is ready!"
 

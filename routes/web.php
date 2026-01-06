@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -26,6 +27,11 @@ Route::middleware('auth')->group(function () {
 
     // Debug route (temporary - remove after fixing)
     Route::get('/debug/storage', function () {
+        $logFile = storage_path('logs/laravel.log');
+
+        // Test writing to log
+        Log::info('DEBUG: Test log entry from /debug/storage route');
+
         $info = [
             'storage_link_exists' => is_link(public_path('storage')),
             'storage_link_target' => is_link(public_path('storage')) ? readlink(public_path('storage')) : 'N/A',
@@ -35,14 +41,18 @@ Route::middleware('auth')->group(function () {
             'public_storage_path' => public_path('storage'),
             'gd_enabled' => extension_loaded('gd'),
             'php_version' => PHP_VERSION,
+            'log_file_path' => $logFile,
+            'log_file_exists' => file_exists($logFile),
+            'log_file_size' => file_exists($logFile) ? filesize($logFile) : 0,
+            'log_dir_writable' => is_writable(storage_path('logs')),
             'recent_logs' => [],
         ];
 
         // Get recent logs
-        $logFile = storage_path('logs/laravel.log');
         if (file_exists($logFile)) {
             $lines = file($logFile);
-            $info['recent_logs'] = array_slice($lines, -50);
+            $info['recent_logs'] = array_slice($lines, -100); // Increase to 100 lines
+            $info['total_log_lines'] = count($lines);
         }
 
         return response()->json($info, 200, [], JSON_PRETTY_PRINT);

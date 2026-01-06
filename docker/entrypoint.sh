@@ -89,8 +89,7 @@ fi
 
 # Clear and cache config
 php artisan config:cache
-# Temporarily disable route cache to debug issue
-# php artisan route:cache
+php artisan route:cache
 php artisan view:cache
 
 echo "Laravel application started successfully!"

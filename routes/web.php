@@ -3,7 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -30,7 +29,8 @@ Route::middleware('auth')->group(function () {
         $logFile = storage_path('logs/laravel.log');
 
         // Test writing to log
-        Log::info('DEBUG: Test log entry from /debug/storage route');
+        \Log::info('DEBUG: Test log entry from /debug/storage route');
+        error_log('DEBUG: Test error_log entry from /debug/storage route');
 
         $info = [
             'storage_link_exists' => is_link(public_path('storage')),
@@ -44,15 +44,27 @@ Route::middleware('auth')->group(function () {
             'log_file_path' => $logFile,
             'log_file_exists' => file_exists($logFile),
             'log_file_size' => file_exists($logFile) ? filesize($logFile) : 0,
+            'log_file_writable' => file_exists($logFile) ? is_writable($logFile) : 'N/A',
             'log_dir_writable' => is_writable(storage_path('logs')),
+            'php_error_log' => ini_get('error_log'),
+            'display_errors' => ini_get('display_errors'),
+            'log_errors' => ini_get('log_errors'),
             'recent_logs' => [],
+            'nginx_error_logs' => [],
         ];
 
-        // Get recent logs
+        // Get recent Laravel logs
         if (file_exists($logFile)) {
             $lines = file($logFile);
-            $info['recent_logs'] = array_slice($lines, -100); // Increase to 100 lines
+            $info['recent_logs'] = array_slice($lines, -100);
             $info['total_log_lines'] = count($lines);
+        }
+
+        // Try to get nginx error logs
+        $nginxErrorLog = '/var/log/nginx/error.log';
+        if (file_exists($nginxErrorLog) && is_readable($nginxErrorLog)) {
+            $lines = file($nginxErrorLog);
+            $info['nginx_error_logs'] = array_slice($lines, -50);
         }
 
         return response()->json($info, 200, [], JSON_PRETTY_PRINT);

@@ -10,6 +10,13 @@ mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/storage/app/public/avatars
 
+# Create nginx temp directories for file uploads
+mkdir -p /var/lib/nginx/tmp/client_body
+mkdir -p /var/lib/nginx/tmp/proxy
+mkdir -p /var/lib/nginx/tmp/fastcgi
+mkdir -p /var/lib/nginx/tmp/uwsgi
+mkdir -p /var/lib/nginx/tmp/scgi
+
 # Create log file with proper permissions
 touch /var/www/html/storage/logs/laravel.log
 chmod 666 /var/www/html/storage/logs/laravel.log
@@ -18,11 +25,15 @@ chmod 666 /var/www/html/storage/logs/laravel.log
 rm -f /var/www/html/public/storage
 php artisan storage:link || echo "Storage link already exists or failed to create"
 
-# Set permissions
+# Set permissions for Laravel storage
 chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
+
+# Set permissions for nginx temp directories
+chown -R www-data:www-data /var/lib/nginx/tmp
+chmod -R 755 /var/lib/nginx/tmp
 
 # IMPORTANT: Clear all Laravel caches first
 echo "Clearing Laravel caches..."

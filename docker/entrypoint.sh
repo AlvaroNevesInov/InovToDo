@@ -84,8 +84,12 @@ if [ "$USER_COUNT" = "0" ]; then
   echo "Database is empty, running seeders..."
   php artisan db:seed --force --no-interaction
 else
-  echo "Database already has users, skipping seeding."
+  echo "Database already has users, skipping main seeding."
 fi
+
+# Always run TaskSeeder to create tasks for users without tasks
+echo "Running TaskSeeder for users without tasks..."
+php artisan db:seed --class=TaskSeeder --force --no-interaction || echo "TaskSeeder completed or skipped"
 
 # Clear and cache config
 php artisan config:cache

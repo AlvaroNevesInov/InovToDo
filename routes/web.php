@@ -23,6 +23,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Debug route (temporary - remove after fixing)
+    Route::get('/debug/storage', function () {
+        $info = [
+            'storage_link_exists' => is_link(public_path('storage')),
+            'storage_link_target' => is_link(public_path('storage')) ? readlink(public_path('storage')) : 'N/A',
+            'avatars_dir_exists' => is_dir(storage_path('app/public/avatars')),
+            'avatars_dir_writable' => is_writable(storage_path('app/public/avatars')),
+            'storage_path' => storage_path('app/public/avatars'),
+            'public_storage_path' => public_path('storage'),
+            'gd_enabled' => extension_loaded('gd'),
+            'php_version' => PHP_VERSION,
+            'recent_logs' => [],
+        ];
+
+        // Get recent logs
+        $logFile = storage_path('logs/laravel.log');
+        if (file_exists($logFile)) {
+            $lines = file($logFile);
+            $info['recent_logs'] = array_slice($lines, -50);
+        }
+
+        return response()->json($info, 200, [], JSON_PRETTY_PRINT);
+    })->name('debug.storage');
 });
 
 require __DIR__.'/auth.php';

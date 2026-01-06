@@ -12,6 +12,7 @@
           v-model="values.title"
           @blur="touchField('title')"
           type="text"
+          required
           aria-required="true"
           :aria-invalid="shouldShowError('title')"
           :aria-describedby="shouldShowError('title') ? 'title-error' : undefined"
@@ -95,6 +96,7 @@
             id="priority"
             v-model="values.priority"
             @blur="touchField('priority')"
+            required
             aria-required="true"
             :aria-invalid="shouldShowError('priority')"
             :aria-describedby="shouldShowError('priority') ? 'priority-error' : undefined"

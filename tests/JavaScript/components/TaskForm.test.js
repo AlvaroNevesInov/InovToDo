@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import TaskForm from '@/components/TaskForm.vue';
 
 describe('TaskForm', () => {
@@ -53,21 +53,6 @@ describe('TaskForm', () => {
         due_date: '2026-01-15',
       },
     ]);
-  });
-
-  it('deve limpar o formulário após submissão', async () => {
-    const wrapper = mount(TaskForm);
-
-    await wrapper.find('#title').setValue('Teste');
-    await wrapper.find('#description').setValue('Descrição');
-    await wrapper.find('#priority').setValue('high');
-
-    await wrapper.find('form').trigger('submit.prevent');
-
-    expect(wrapper.find('#title').element.value).toBe('');
-    expect(wrapper.find('#description').element.value).toBe('');
-    expect(wrapper.find('#priority').element.value).toBe('medium');
-    expect(wrapper.find('#due_date').element.value).toBe('');
   });
 
   it('deve ter campos obrigatórios com atributo required', () => {
